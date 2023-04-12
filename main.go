@@ -18,9 +18,15 @@ var wg sync.WaitGroup
 
 func PortCheck(host, port string, writer *bufio.Writer) {
 	defer wg.Done()
-	target := fmt.Sprintf("%s:%s", host, port)
+	var target string
+	if strings.Contains(host, ".") {
+		target = fmt.Sprintf("%s:%s", host, port)
+	} else if strings.Contains(host, ":") {
+		target = fmt.Sprintf("[%s]:%s", host, port)
+	}
 	conn, err := net.DialTimeout("tcp", target, time.Second*3)
 	if err != nil {
+		//端口未连接，不需要关闭，否则会报错
 		fmt.Printf("%s %s down\n", host, port)
 		return
 	} else {
